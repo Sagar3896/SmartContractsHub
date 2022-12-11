@@ -1,0 +1,46 @@
+// SPDX-License-Identifier: GPL-3.0
+
+pragma solidity ^0.6.0;
+
+contract BookHotel{
+
+enum Statuses  { Vacant , Occupied }
+Statuses Currentstatus;
+
+event Occupy(address _occupant,uint _value);
+
+address payable public owner;
+
+constructor() public{
+    owner=msg.sender;
+    Currentstatus=Statuses.Vacant;
+}
+
+modifier OnWhileVacant{
+    require(Currentstatus == Statuses.Vacant , "Currently Occupied !!!");
+    _;
+}
+
+modifier OnWhileBooked{
+    require(Currentstatus == Statuses.Occupied , "Currently Vacant need to Occupy  !!!");
+    _;
+}
+    
+modifier Cost(uint _amt){
+    require(msg.value >= _amt , "Not enough Ethers provided !!!");
+    _;
+}
+
+
+//Call the function by providing 2 ethers 
+    function checkIn() public payable  OnWhileVacant Cost(2 ether) {
+    Currentstatus=Statuses.Occupied;
+    }
+
+    function CheckOut() public OnWhileBooked {
+    Currentstatus=Statuses.Vacant;
+    }
+
+
+        
+}
