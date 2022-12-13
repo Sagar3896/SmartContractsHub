@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.13;
+
+contract Wages {
+
+// Initialise a constructor with N ethers as Organisation Balance
+// Function to get balance by only contract deployer
+// Function to add funds to Balance only contract deployer
+// Function to payWage to an address by the contract deployer
+
+     event wagePaid(string message,address indexed receiver, uint amt);
+
+     uint contractBalance;
+     address owner;
+
+     constructor() payable {
+        require(msg.value > 0,"The Contract was deployed with 0 Ethers !!");
+        contractBalance = msg.value;
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+    require(msg.sender == owner, "Only the owner of the address or authorised person can view/add the contract balance.");
+     _;
+    }
+
+    function getContractBalance() onlyOwner public view returns(uint) {
+    return contractBalance;
+    }
+
+    function addFunds() onlyOwner public payable returns(uint) {
+     contractBalance+=msg.value;
+     return contractBalance;
+    }
+
+    function calculateAmount(uint _hrs) internal pure returns(uint _amt) {
+    uint amt = 1000000000000000000 * _hrs;
+    return amt;
+    }
+
+    function payWage(uint _hrs, address payable _to) onlyOwner public payable {
+    require(_hrs >= 2, "The Organisation only pays if the Number of hours are greater than equal to 2 hrs !!");
+    require(_to != owner, "You cannot pay to yourself please change the address with intended address.");
+
+    uint _amt = calculateAmount(_hrs);
+
+    contractBalance-=_amt;
+     _to.transfer(_amt);
+    emit wagePaid("The owner of the contract paid wage to mentioned address with given amount", _to, _amt);
+    }
+}
